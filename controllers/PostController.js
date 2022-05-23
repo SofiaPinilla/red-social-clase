@@ -2,7 +2,8 @@ const { Post, User, Sequelize } = require("../models/index.js");
 const { Op } = Sequelize;
 const PostController = {
   create(req, res) {
-    Post.create({ ...req.body })
+    console.log(req.user)
+    Post.create({ ...req.body, UserId: req.user.id })
       .then((post) =>
         res.status(201).send({ message: "Publicación creada con éxito", post })
       )
