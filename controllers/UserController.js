@@ -18,6 +18,11 @@ const UserController = {
     try {
       req.body.role = "user";
       const password = await bcrypt.hash(req.body.password, 10);
+      // const existUser = await User.findOne({ email: req.body.email });
+      // console.log(existUser)
+      // if(existUser){
+      //   return res.status(400).send('Este email ya existe')
+      // }
       const user = await User.create({ ...req.body, password });
       res.status(201).send({ message: "Usuario creado con éxito", user });
     } catch (error) {
@@ -74,22 +79,27 @@ const UserController = {
       where: {
         email: req.body.email,
       },
-    }).then((user) => {
-      if (!user) {
-        return res
-          .status(400)
-          .send({ message: "Usuario o contraseña incorrectos" });
-      }
-      const isMatch = bcrypt.compareSync(req.body.password, user.password);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .send({ message: "Usuario o contraseña incorrectos" });
-      }
-      const token = jwt.sign({ id: user.id }, jwt_secret); //creamos el token
-      Token.create({ token, UserId: user.id }); // guardamos el token en la tabla
-      res.send({ message: "Bienvenid@", user, token });
-    });
+    })
+      .then((user) => {
+        if (!user) {
+          return res
+            .status(400)
+            .send({ message: "Usuario o contraseña incorrectos" });
+        }
+        const isMatch = bcrypt.compareSync(req.body.password, user.password);
+        if (!isMatch) {
+          return res
+            .status(400)
+            .send({ message: "Usuario o contraseña incorrectos" });
+        }
+        const token = jwt.sign({ id: user.id }, jwt_secret); //creamos el token
+        Token.create({ token, UserId: user.id }); // guardamos el token en la tabla
+        res.send({ message: "Bienvenid@", user, token });
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send({message:'Ha habido un error',err});
+      });
   },
   async logout(req, res) {
     try {
